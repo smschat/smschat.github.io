@@ -38,6 +38,15 @@
       border-radius: 4px;
       cursor: pointer;
     }
+    .message {
+      margin: 5px 0;
+    }
+    .error {
+      color: red;
+    }
+    .success {
+      color: green;
+    }
   </style>
 </head>
 <body>
@@ -65,18 +74,24 @@
 
     // Function to send a message
     function sendMessage() {
-      try {
-        const messageInput = document.getElementById('message');
-        const message = messageInput.value.trim();
-        if (message) {
-          db.collection('messages').add({
-            text: message,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          });
+      const messageInput = document.getElementById('message');
+      const message = messageInput.value.trim();
+      if (message) {
+        db.collection('messages').add({
+          text: message,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        })
+        .then(() => {
+          // Display success message
+          displayMessage("Message sent successfully!", "success");
           messageInput.value = '';
-        }
-      } catch (error) {
-        console.error("Error sending message: ", error);
+        })
+        .catch((error) => {
+          // Display error message
+          displayMessage(`Error sending message: ${error.message}`, "error");
+        });
+      } else {
+        displayMessage("Message cannot be empty!", "error");
       }
     }
 
@@ -88,14 +103,22 @@
         chat.innerHTML = '';
         snapshot.forEach(doc => {
           const message = doc.data();
-          const messageElement = document.createElement('div');
-          messageElement.textContent = message.text;
-          chat.appendChild(messageElement);
+          displayMessage(message.text, "message");
         });
         chat.scrollTop = chat.scrollHeight;
       }, error => {
-        console.error("Error fetching messages: ", error);
+        displayMessage(`Error fetching messages: ${error.message}`, "error");
       });
+
+    // Function to display a message in the chat window
+    function displayMessage(text, type) {
+      const chat = document.getElementById('chat');
+      const messageElement = document.createElement('div');
+      messageElement.textContent = text;
+      messageElement.classList.add(type);
+      chat.appendChild(messageElement);
+      chat.scrollTop = chat.scrollHeight;
+    }
   </script>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
