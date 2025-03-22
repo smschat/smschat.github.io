@@ -65,14 +65,18 @@
 
     // Function to send a message
     function sendMessage() {
-      const messageInput = document.getElementById('message');
-      const message = messageInput.value.trim();
-      if (message) {
-        db.collection('messages').add({
-          text: message,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        messageInput.value = '';
+      try {
+        const messageInput = document.getElementById('message');
+        const message = messageInput.value.trim();
+        if (message) {
+          db.collection('messages').add({
+            text: message,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          messageInput.value = '';
+        }
+      } catch (error) {
+        console.error("Error sending message: ", error);
       }
     }
 
@@ -89,6 +93,8 @@
           chat.appendChild(messageElement);
         });
         chat.scrollTop = chat.scrollHeight;
+      }, error => {
+        console.error("Error fetching messages: ", error);
       });
   </script>
   <!-- Firebase SDK -->
